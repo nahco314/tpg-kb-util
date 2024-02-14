@@ -1,7 +1,7 @@
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
-use tpg_kb_util::linux::listen_events;
+use tpg_kb_util::listen_events;
 
 pub fn main() {
     let (tx, rx) = mpsc::channel();
