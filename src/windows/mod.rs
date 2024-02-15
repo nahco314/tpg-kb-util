@@ -2,9 +2,12 @@ mod keys;
 
 extern crate multiinput;
 
-use crate::keys::key_to_num;
+use keys::key_to_num;
 use multiinput::*;
 use std::collections::{HashMap, HashSet};
+use std::sync::mpsc;
+
+use crate::kb_event::KBEvent;
 
 const USE_CONTINUED_INPUT: bool = false;
 const KEYBOARD_CNT: u8 = 2;
@@ -46,7 +49,7 @@ fn detect_set(dev_keys: &HashMap<KeyId, bool>) -> Option<u8> {
     return if num >= KEYBOARD_CNT { None } else { Some(num) };
 }
 
-fn main() {
+pub fn  listen_events(out_tx: mpsc::Sender<KBEvent>) {
     let mut is_on_press: HashMap<usize, HashMap<KeyId, bool>> = HashMap::new();
     let mut device_to_keyboard: HashMap<usize, u8> = HashMap::new();
     let mut keyboard_to_device: HashMap<u8, usize> = HashMap::new();
@@ -66,9 +69,8 @@ fn main() {
                     if let Some(keyboard_id) = device_to_keyboard.get(&device_id) {
                         if (!is_continued) || USE_CONTINUED_INPUT {
                             if let Some(key_num) = key_to_num(&key_id) {
-                                let kb_event =
-                                    kb_event::KBEvent::create_key_pressed(*keyboard_id, key_num);
-                                kb_event.write();
+                                let kb_event = KBEvent::create_key_pressed(*keyboard_id, key_num);
+                                out_tx.send(kb_event).unwrap();
                             }
                         }
                     }
@@ -80,9 +82,8 @@ fn main() {
 
                         device_to_keyboard.insert(device_id, keyboard_id);
                         keyboard_to_device.insert(keyboard_id, device_id);
-                        let kb_event =
-                            kb_event::KBEvent::create_set_keyboard(keyboard_id, device_id);
-                        kb_event.write();
+                        let kb_event = KBEvent::create_set_keyboard(keyboard_id, device_id);
+                        out_tx.send(kb_event).unwrap();
                     }
                 }
                 RawEvent::KeyboardEvent(device_id, key_id, State::Released) => {
@@ -91,9 +92,8 @@ fn main() {
 
                     if let Some(keyboard_id) = device_to_keyboard.get(&device_id) {
                         if let Some(key_num) = key_to_num(&key_id) {
-                            let kb_event =
-                                kb_event::KBEvent::create_key_released(*keyboard_id, key_num);
-                            kb_event.write();
+                            let kb_event = KBEvent::create_key_released(*keyboard_id, key_num);
+                            out_tx.send(kb_event).unwrap();
                         }
                     }
                 }
