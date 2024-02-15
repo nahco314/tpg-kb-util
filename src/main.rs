@@ -5,7 +5,7 @@ use tpg_kb_util::listen_events;
 
 pub fn main() {
     let (tx, rx) = mpsc::channel();
-    thread::spawn(move || {
+    let t = thread::spawn(move || {
         listen_events(tx);
     });
 

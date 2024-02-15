@@ -2,7 +2,7 @@ use std::io;
 use std::io::Write;
 
 #[derive(Debug)]
-enum KBEventType {
+pub enum KBEventType {
     SetKeyboard { device_id: u8 },
     KeyPressed { key_num: u8 },
     KeyReleased { key_num: u8 },
@@ -10,8 +10,8 @@ enum KBEventType {
 
 #[derive(Debug)]
 pub struct KBEvent {
-    keyboard_id: u8,
-    event_type: KBEventType,
+    pub keyboard_id: u8,
+    pub event_type: KBEventType,
 }
 
 impl KBEvent {
