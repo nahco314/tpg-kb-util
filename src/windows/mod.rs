@@ -6,6 +6,8 @@ use keys::key_to_num;
 use multiinput::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::mpsc;
+use std::thread::sleep;
+use std::time::{Duration, Instant};
 
 use crate::kb_event::KBEvent;
 
@@ -58,6 +60,8 @@ pub fn  listen_events(out_tx: mpsc::Sender<KBEvent>) {
     manager.register_devices(DeviceType::Keyboards);
 
     loop {
+        sleep(Duration::from_secs_f32(0.001));
+
         if let Some(event) = manager.get_event() {
             match event {
                 RawEvent::KeyboardEvent(device_id, key_id, State::Pressed) => {
